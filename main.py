@@ -113,3 +113,38 @@ def sell_product(req: SellRequest):
         "productId": product.id,
         "remainingStock": product.stock
     }
+
+# ----- GET /api/products/search -----
+@app.get("/api/products/search")
+def search_products(keyword: str):
+    key = keyword.lower()
+
+    results = [
+        p for p in db
+        if key in p.name.lower() or key in p.sku.lower()
+    ]
+
+    return results
+
+# ----- POST /api/products/restock -----
+class RestockRequest(BaseModel):
+    productId: int
+    quantity: int
+
+@app.post("/api/products/restock")
+def restock_product(req: RestockRequest):
+    if req.quantity <= 0:
+        raise HTTPException(400, detail="quantity ต้องมากกว่า 0")
+
+    product = next((p for p in db if p.id == req.productId), None)
+    if not product:
+        raise HTTPException(404, detail="ไม่พบสินค้า")
+
+    product.stock += req.quantity
+    save_db()
+
+    return {
+        "message": "เติมสต็อกสำเร็จ",
+        "productId": product.id,
+        "remainingStock": product.stock
+    }
