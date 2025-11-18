@@ -6,7 +6,7 @@ pip install fastapi uvicorn
 ```
 uvicorn main:app --reload
 ```
-# Swagger
+## Swagger
 ```
 http://localhost:8000/docs
 ```
