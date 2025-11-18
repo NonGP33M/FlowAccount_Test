@@ -148,3 +148,23 @@ def restock_product(req: RestockRequest):
         "productId": product.id,
         "remainingStock": product.stock
     }
+
+# ----- PUT /api/products/bulk-price-update -----
+from typing import List
+
+class PriceUpdateItem(BaseModel):
+    productId: int
+    newPrice: float
+
+@app.put("/api/products/bulk-price-update")
+def bulk_price_update(items: List[PriceUpdateItem]):
+    updated_count = 0
+
+    for item in items:
+        product = next((p for p in db if p.id == item.productId), None)
+        if product and item.newPrice > 0:
+            product.price = item.newPrice
+            updated_count += 1
+
+    save_db()
+    return {"updatedCount": updated_count}
